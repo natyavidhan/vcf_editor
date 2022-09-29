@@ -54,13 +54,14 @@ class App:
         self.address.place(x=190, y=115, width=100, height=55)
 
         self.contacts = []
+        self.last_opened = None
     
     def parse_vcf(self, contact:str):
         contact = contact.split("\n")
         c = {}
         for line in contact:
             if line.startswith("N:") or line.startswith("FN:"):
-                c["name"] = line.replace("N:", "")
+                c['name'] = "".join(line.split(":")[1])
             elif line.startswith("TITLE:"):
                 c["nickname"] = line.replace("TITLE:", "")
             elif line.startswith("TEL;TYPE=CELL:"):
@@ -148,7 +149,7 @@ class App:
         self.load_contacts()
     
     def save_contact(self):
-        index = self.contact_list.curselection()[0]
+        index = self.last_opened
         self.contacts[index]["name"] = self.name.get()
         self.contacts[index]["nickname"] = self.nickname.get()
         self.contacts[index]["phone"] = self.phone.get()
@@ -157,6 +158,7 @@ class App:
     
     def select_contact(self, event):
         index = self.contact_list.curselection()[0]
+        self.last_opened = index
         self.name.delete(0, "end")
         self.name.insert(0, self.contacts[index]["name"])
         try:
@@ -178,7 +180,7 @@ class App:
             pass
 
     def delete_contact(self):
-        self.contacts.pop(self.contact_list.curselection()[0])
+        self.contacts.pop(self.last_opened)
         self.load_contacts()
 
     def load_contacts(self):
